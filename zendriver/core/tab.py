@@ -22,11 +22,11 @@ from .expect import DownloadExpectation, RequestExpectation, ResponseExpectation
 from ..cdp.fetch import RequestStage
 from ..cdp.network import ResourceType
 from ..cdp.runtime import DeepSerializedValue
+from .element import Element
 
 
 if TYPE_CHECKING:
     from .browser import Browser
-    from .element import Element
 
 logger = logging.getLogger(__name__)
 

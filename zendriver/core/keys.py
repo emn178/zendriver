@@ -26,18 +26,62 @@ class SpecialKeys(Enum):
     SPACE = (" ", 32)  # space key
     ENTER = ("Enter", 13)
     TAB = ("Tab", 9)
-
     BACKSPACE = ("Backspace", 8)
     ESCAPE = ("Escape", 27)
     DELETE = ("Delete", 46)
+
     ARROW_LEFT = ("ArrowLeft", 37)
     ARROW_UP = ("ArrowUp", 38)
     ARROW_RIGHT = ("ArrowRight", 39)
     ARROW_DOWN = ("ArrowDown", 40)
-    SHIFT = ("Shift", 16)  # internal use only
-    ALT = ("Alt", 18)  # internal use only
-    CTRL = ("Control", 17)  # internal use only
-    META = ("Meta", 91)  # internal use only
+
+    F1 = ("F1", 112)
+    F2 = ("F2", 113)
+    F3 = ("F3", 114)
+    F4 = ("F4", 115)
+    F5 = ("F5", 116)
+    F6 = ("F6", 117)
+    F7 = ("F7", 118)
+    F8 = ("F8", 119)
+    F9 = ("F9", 120)
+    F10 = ("F10", 121)
+    F11 = ("F11", 122)
+    F12 = ("F12", 123)
+
+    HOME = ("Home", 36)
+    END = ("End", 35)
+    PAGE_UP = ("PageUp", 33)
+    PAGE_DOWN = ("PageDown", 34)
+    INSERT = ("Insert", 45)
+
+    NUMPAD_0 = ("Numpad0", 96)
+    NUMPAD_1 = ("Numpad1", 97)
+    NUMPAD_2 = ("Numpad2", 98)
+    NUMPAD_3 = ("Numpad3", 99)
+    NUMPAD_4 = ("Numpad4", 100)
+    NUMPAD_5 = ("Numpad5", 101)
+    NUMPAD_6 = ("Numpad6", 102)
+    NUMPAD_7 = ("Numpad7", 103)
+    NUMPAD_8 = ("Numpad8", 104)
+    NUMPAD_9 = ("Numpad9", 105)
+    NUMPAD_ADD = ("NumpadAdd", 107)
+    NUMPAD_SUBTRACT = ("NumpadSubtract", 109)
+    NUMPAD_MULTIPLY = ("NumpadMultiply", 106)
+    NUMPAD_DIVIDE = ("NumpadDivide", 111)
+    NUMPAD_ENTER = ("NumpadEnter", 13)
+    NUMPAD_DECIMAL = ("NumpadDecimal", 110)
+    NUMLOCK = ("NumLock", 144)
+
+    CAPS_LOCK = ("CapsLock", 20)
+    SCROLL_LOCK = ("ScrollLock", 145)
+
+    PAUSE = ("Pause", 19)
+    PRINT_SCREEN = ("PrintScreen", 44)
+
+    SHIFT = ("Shift", 16)
+    ALT = ("Alt", 18)
+    CTRL = ("Control", 17)
+    META = ("Meta", 91)
 
 
 class KeyPressEvent(str, Enum):
@@ -126,6 +170,7 @@ class KeyEvents:
         SpecialKeys.SPACE: " ",
         SpecialKeys.ENTER: "\r",
         SpecialKeys.TAB: "\t",
+        SpecialKeys.NUMPAD_ENTER: "\r",
     }
 
     class Payload(TypedDict):
@@ -167,8 +212,10 @@ class KeyEvents:
             return "\n"
         elif specialKey_key == SpecialKeys.TAB:
             return "\t"
+        elif specialKey_key == SpecialKeys.NUMPAD_ENTER:
+            return "\n"
         raise ValueError(
-            f"Cannot convert {specialKey_key} to string, only SPACE, ENTER and TAB are supported."
+            f"Cannot convert {specialKey_key} to string, only SPACE, ENTER, TAB and NUMPAD_ENTER are supported."
         )
 
     def _get_key_and_text(
