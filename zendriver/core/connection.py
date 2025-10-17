@@ -329,7 +329,7 @@ class Connection(metaclass=CantTouchThis):
 
     @property
     def closed(self) -> bool:
-        return self.websocket is None
+        return self.websocket is None or self.websocket.state == websockets.protocol.State.CLOSED
 
     def add_handler(
         self,

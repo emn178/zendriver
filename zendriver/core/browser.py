@@ -615,7 +615,8 @@ class Browser:
             return
 
         if self.connection:
-            await self.connection.send(cdp.browser.close())
+            if not self.connection.closed:
+                await self.connection.send(cdp.browser.close())
             await self.connection.aclose()
             logger.debug("closed the connection")
 
