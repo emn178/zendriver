@@ -201,6 +201,19 @@ def filter_recurse(
 
     return None
 
+def filter_recurse_including_iframes(
+    doc: cdp.dom.Node, predicate: Callable[[cdp.dom.Node], bool]
+) -> cdp.dom.Node | None:
+    result = filter_recurse(doc, predicate)
+    if result:
+        return result
+
+    frames = filter_recurse_all(doc, lambda n: n.node_name == "IFRAME")
+    for frame in frames:
+        result = filter_recurse_including_iframes(frame.content_document, predicate)
+        if result:
+            return result
+    return None
 
 def circle(
     x: float, y: float | None = None, radius: int = 10, num: int = 10, dir: int = 0

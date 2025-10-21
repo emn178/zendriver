@@ -450,6 +450,13 @@ class Tab(Connection):
             doc = _node
             if _node.node_name == "IFRAME":
                 doc = _node.content_document
+                info = await self.send(cdp.dom.describe_node(backend_node_id=doc.backend_node_id))
+
+                # update doc if node_id is different
+                if info.node_id != doc.node_id:
+                    doc = await self.send(cdp.dom.get_document(-1, True))
+                    node = util.filter_recurse_including_iframes(doc, lambda n: n.backend_node_id == _node.backend_node_id)
+                    doc = node.content_document
         node_ids = []
 
         try:
@@ -509,6 +516,13 @@ class Tab(Connection):
             doc = _node
             if _node.node_name == "IFRAME":
                 doc = _node.content_document
+                info = await self.send(cdp.dom.describe_node(backend_node_id=doc.backend_node_id))
+
+                # update doc if node_id is different
+                if info.node_id != doc.node_id:
+                    doc = await self.send(cdp.dom.get_document(-1, True))
+                    node = util.filter_recurse_including_iframes(doc, lambda n: n.backend_node_id == _node.backend_node_id)
+                    doc = node.content_document
         node_id = None
 
         try:
