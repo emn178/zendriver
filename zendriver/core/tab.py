@@ -444,23 +444,29 @@ class Tab(Connection):
         :rtype:
         """
         doc: Any
+        tab = self
         if not _node:
-            doc = await self.send(cdp.dom.get_document(-1, True))
+            doc = await tab.send(cdp.dom.get_document(-1, True))
         else:
             doc = _node
             if _node.node_name == "IFRAME":
                 doc = _node.content_document
-                info = await self.send(cdp.dom.describe_node(backend_node_id=doc.backend_node_id))
+                if not doc:
+                    tab = next((target for target in self.browser.targets if target.target.target_id == _node.frame_id), None)
+                    await self.send(cdp.target.attach_to_target(target_id=tab.target.target_id, flatten=True))
+                    doc = await tab.send(cdp.dom.get_document(-1, True))
+                else:
+                    info = await tab.send(cdp.dom.describe_node(backend_node_id=doc.backend_node_id))
 
-                # update doc if node_id is different
-                if info.node_id != doc.node_id:
-                    doc = await self.send(cdp.dom.get_document(-1, True))
-                    node = util.filter_recurse_including_iframes(doc, lambda n: n.backend_node_id == _node.backend_node_id)
-                    doc = node.content_document
+                    # update doc if node_id is different
+                    if info.node_id != doc.node_id:
+                        doc = await tab.send(cdp.dom.get_document(-1, True))
+                        node = util.filter_recurse_including_iframes(doc, lambda n: n.backend_node_id == _node.backend_node_id)
+                        doc = node.content_document
         node_ids = []
 
         try:
-            node_ids = await self.send(
+            node_ids = await tab.send(
                 cdp.dom.query_selector_all(doc.node_id, selector)
             )
         except ProtocolException as e:
@@ -475,9 +481,9 @@ class Tab(Connection):
                         await _node.update()
                     # make sure this isn't turned into infinite loop
                     setattr(_node, "__last", True)
-                    return await self.query_selector_all(selector, _node)
+                    return await tab.query_selector_all(selector, _node)
             else:
-                await self.disable_dom_agent()
+                await tab.disable_dom_agent()
                 raise
         if not node_ids:
             return []
@@ -489,7 +495,7 @@ class Tab(Connection):
             # to improve performance
             if not node:
                 continue
-            elem = element.create(node, self, doc)
+            elem = element.create(node, tab, doc)
             items.append(elem)
 
         return items
@@ -510,23 +516,29 @@ class Tab(Connection):
         selector = selector.strip()
 
         doc: Any
+        tab = self
         if not _node:
-            doc = await self.send(cdp.dom.get_document(-1, True))
+            doc = await tab.send(cdp.dom.get_document(-1, True))
         else:
             doc = _node
             if _node.node_name == "IFRAME":
                 doc = _node.content_document
-                info = await self.send(cdp.dom.describe_node(backend_node_id=doc.backend_node_id))
+                if not doc:
+                    tab = next((target for target in self.browser.targets if target.target.target_id == _node.frame_id), None)
+                    await self.send(cdp.target.attach_to_target(target_id=tab.target.target_id, flatten=True))
+                    doc = await tab.send(cdp.dom.get_document(-1, True))
+                else:
+                    info = await tab.send(cdp.dom.describe_node(backend_node_id=doc.backend_node_id))
 
-                # update doc if node_id is different
-                if info.node_id != doc.node_id:
-                    doc = await self.send(cdp.dom.get_document(-1, True))
-                    node = util.filter_recurse_including_iframes(doc, lambda n: n.backend_node_id == _node.backend_node_id)
-                    doc = node.content_document
+                    # update doc if node_id is different
+                    if info.node_id != doc.node_id:
+                        doc = await tab.send(cdp.dom.get_document(-1, True))
+                        node = util.filter_recurse_including_iframes(doc, lambda n: n.backend_node_id == _node.backend_node_id)
+                        doc = node.content_document
         node_id = None
 
         try:
-            node_id = await self.send(cdp.dom.query_selector(doc.node_id, selector))
+            node_id = await tab.send(cdp.dom.query_selector(doc.node_id, selector))
 
         except ProtocolException as e:
             if _node is not None:
@@ -540,7 +552,7 @@ class Tab(Connection):
                         await _node.update()
                     # make sure this isn't turned into infinite loop
                     setattr(_node, "__last", True)
-                    return await self.query_selector(selector, _node)
+                    return await tab.query_selector(selector, _node)
             elif (
                 e.message is not None
                 and "could not find node" in e.message.lower()
@@ -548,14 +560,14 @@ class Tab(Connection):
             ):
                 return None
             else:
-                await self.disable_dom_agent()
+                await tab.disable_dom_agent()
                 raise
         if not node_id:
             return None
         node = util.filter_recurse(doc, lambda n: n.node_id == node_id)
         if not node:
             return None
-        return element.create(node, self, doc)
+        return element.create(node, tab, doc)
 
     async def find_elements_by_text(
         self,
