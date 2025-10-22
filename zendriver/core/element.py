@@ -910,7 +910,10 @@ class Element:
         viewport = pos.to_viewport(float(scale if scale else 1))
         await self.tab.sleep()
 
-        data = await self._tab.send(
+        px, py = await self.tab.get_offset_to_root_tab()
+        viewport.x += px
+        viewport.y += py
+        data = await self._tab.root_tab.send(
             cdp.page.capture_screenshot(
                 format, clip=viewport, capture_beyond_viewport=True
             )

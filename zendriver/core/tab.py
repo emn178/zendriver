@@ -143,6 +143,9 @@ class Tab(Connection):
         self.browser = browser
         self._dom = None
         self._window_id = None
+        self.root_tab = self
+        self.parent_tab = None
+        self.iframe_element = None
 
     @property
     def inspector_url(self) -> str:
@@ -525,7 +528,10 @@ class Tab(Connection):
                 doc = _node.content_document
                 if not doc:
                     tab = next((target for target in self.browser.targets if target.target.target_id == _node.frame_id), None)
-                    await self.send(cdp.target.attach_to_target(target_id=tab.target.target_id, flatten=True))
+                    tab.root_tab = self.root_tab
+                    tab.parent_tab = self
+                    tab.iframe_element = _node
+                    await self.root_tab.send(cdp.target.attach_to_target(target_id=tab.target.target_id, flatten=True))
                     doc = await tab.send(cdp.dom.get_document(-1, True))
                 else:
                     info = await tab.send(cdp.dom.describe_node(backend_node_id=doc.backend_node_id))
@@ -1793,6 +1799,14 @@ class Tab(Connection):
                 platform=platform,
             )
         )
+
+    async def get_offset_to_root_tab(self) -> tuple[int, int]:
+        if self.parent_tab:
+            px, py = await self.parent_tab.get_offset_to_root_tab()
+            box = await self.parent_tab.send(cdp.dom.get_box_model(node_id=self.iframe_element.node_id))
+            return (px + box.content[0], py + box.content[1])
+        else:
+            return (0, 0)
 
     async def __call__(
         self,
