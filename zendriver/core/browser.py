@@ -279,7 +279,7 @@ class Browser:
         future = asyncio.get_running_loop().create_future()
         event_type = cdp.target.TargetInfoChanged
 
-        async def get_handler(event: cdp.target.TargetInfoChanged) -> None:
+        def get_handler(event: cdp.target.TargetInfoChanged) -> None:
             if future.done():
                 return
 
