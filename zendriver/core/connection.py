@@ -828,7 +828,7 @@ class Listener:
                             else:
                                 callback = typing.cast(Callable, callback)  # type: ignore
 
-                                def run_callback() -> None:
+                                def run_callback(callback=callback, event=event) -> None:
                                     try:
                                         callback(event, self.connection)
                                     except TypeError:
